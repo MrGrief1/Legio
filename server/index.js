@@ -8,13 +8,15 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = 3001;
-const SECRET_KEY = "supersecretkey"; // In production, use environment variable
+const PORT = process.env.PORT || 3001;
+const HOST = process.env.HOST || '0.0.0.0'; // Listen on all interfaces
+const SECRET_KEY = process.env.SECRET_KEY || "supersecretkey"; // In production, use environment variable
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
+app.use(express.static(path.join(__dirname, '../designe/dist')));
 
 // Database Setup
 const dbPath = path.resolve(__dirname, 'database.sqlite');
@@ -123,17 +125,19 @@ app.post('/auth/login', (req, res) => {
             const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, SECRET_KEY);
             // If name is null (old users), fallback to username
             const name = user.name || user.username;
-            res.json({ token, user: { 
-                id: user.id, 
-                username: user.username, 
-                role: user.role, 
-                points: user.points, 
-                avatar: user.avatar, 
-                name,
-                bio: user.bio,
-                birthdate: user.birthdate,
-                created_at: user.created_at
-            } });
+            res.json({
+                token, user: {
+                    id: user.id,
+                    username: user.username,
+                    role: user.role,
+                    points: user.points,
+                    avatar: user.avatar,
+                    name,
+                    bio: user.bio,
+                    birthdate: user.birthdate,
+                    created_at: user.created_at
+                }
+            });
         } else {
             res.status(400).json({ message: "Invalid credentials" });
         }
@@ -237,7 +241,10 @@ app.post('/api/upload', authenticateToken, upload.single('image'), (req, res) =>
     if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
     }
-    const imageUrl = `http://localhost:3001/uploads/${req.file.filename}`;
+    // Get the host from request or use environment variable
+    const protocol = req.protocol;
+    const host = req.get('host');
+    const imageUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
     res.json({ url: imageUrl });
 });
 
@@ -969,7 +976,7 @@ app.post('/api/chats/:id/messages', authenticateToken, upload.array('files'), (r
                 db.get("SELECT 1 FROM blocked_users WHERE blocker_id = ? AND blocked_id = ?", [otherUserId, userId], (err, blocked) => {
                     if (err) return res.status(500).json({ error: err.message });
                     if (blocked) return res.status(403).json({ message: "You have been blocked by this user" });
-                    
+
                     sendMessage();
                 });
             } else {
@@ -1085,9 +1092,10 @@ app.delete('/api/users/block/:id', authenticateToken, (req, res) => {
         function (err) {
             if (err) return res.status(500).json({ error: err.message });
             res.json({ message: "User unblocked" });
-        }
-    );
+        });
 });
+
+
 
 // Search Users (for new chat)
 app.get('/api/users/search', authenticateToken, (req, res) => {
@@ -1105,6 +1113,15 @@ app.get('/api/users/search', authenticateToken, (req, res) => {
     );
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+// Serve static files from the frontend build directory
+app.use(express.static(path.join(__dirname, '../designe/dist')));
+
+// Serve index.html for any other requests (SPA support)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../designe/dist/index.html'));
+});
+
+app.listen(PORT, HOST, () => {
+    console.log(`Server running on http://${HOST}:${PORT}`);
+    console.log(`Access from network: http://[YOUR_IP]:${PORT}`);
 });
