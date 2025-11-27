@@ -58,12 +58,12 @@ export const DialogModal: React.FC<DialogModalProps> = ({
         <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
+                className="absolute inset-0 bg-black/60 transition-opacity duration-200"
                 onClick={type === 'alert' ? onConfirm : onCancel}
             />
 
             {/* Dialog Box */}
-            <div className="relative bg-white dark:bg-[#121212] w-full max-w-md rounded-[32px] border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="relative bg-white dark:bg-[#121212] w-full max-w-md rounded-[32px] border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden">
                 {/* Icon and Message */}
                 <div className="p-8 text-center">
                     <div className="flex justify-center mb-4">

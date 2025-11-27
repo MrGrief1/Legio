@@ -7,16 +7,83 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+// Fallback for missing packages
+let helmet, rateLimit, compression;
+try { helmet = require('helmet'); } catch (e) {}
+try { rateLimit = require('express-rate-limit'); } catch (e) {}
+try { compression = require('compression'); } catch (e) {}
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 const HOST = process.env.HOST || '0.0.0.0'; // Listen on all interfaces
 const SECRET_KEY = process.env.SECRET_KEY || "supersecretkey"; // In production, use environment variable
 
 // Middleware
+if (helmet) {
+    app.use(helmet({ crossOriginResourcePolicy: false }));
+} else {
+    // Manual Security Headers
+    app.use((req, res, next) => {
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+        res.setHeader('X-XSS-Protection', '1; mode=block');
+        next();
+    });
+}
+
+if (compression) {
+    app.use(compression());
+}
+
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Limit body size
 app.use('/uploads', express.static('uploads'));
 app.use(express.static(path.join(__dirname, '../designe/dist')));
+
+// Rate Limiting
+if (rateLimit) {
+    const limiter = rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: 100,
+        standardHeaders: true,
+        legacyHeaders: false,
+    });
+    app.use('/api/', limiter);
+    
+    const authLimiter = rateLimit({
+        windowMs: 60 * 60 * 1000,
+        max: 10,
+        message: "Too many accounts created from this IP, please try again after an hour"
+    });
+    app.use('/auth/', authLimiter);
+} else {
+    // Simple Custom Rate Limiter
+    const rateLimitMap = new Map();
+    const simpleLimiter = (req, res, next) => {
+        const ip = req.ip;
+        const now = Date.now();
+        const windowMs = 15 * 60 * 1000;
+        const limit = 100;
+
+        if (!rateLimitMap.has(ip)) {
+            rateLimitMap.set(ip, { count: 1, startTime: now });
+        } else {
+            const data = rateLimitMap.get(ip);
+            if (now - data.startTime > windowMs) {
+                data.count = 1;
+                data.startTime = now;
+            } else {
+                data.count++;
+                if (data.count > 3000) {
+                    return res.status(429).json({ message: "Too many requests, please try again later." });
+                }
+            }
+        }
+        next();
+    };
+    app.use('/api/', simpleLimiter);
+    app.use('/auth/', simpleLimiter); // Use same limiter for auth if package missing
+}
 
 // Database Setup
 const dbPath = path.resolve(__dirname, 'database.sqlite');
@@ -44,10 +111,27 @@ const storage = multer.diskStorage({
         cb(null, 'uploads/');
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
     }
 });
-const upload = multer({ storage });
+
+const fileFilter = (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif|webp/;
+    const mimetype = allowedTypes.test(file.mimetype);
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+
+    if (mimetype && extname) {
+        return cb(null, true);
+    }
+    cb(new Error('Only images are allowed'));
+};
+
+const upload = multer({ 
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter
+});
 
 // --- Middleware ---
 
@@ -99,7 +183,9 @@ const getUserIdFromToken = (req) => {
 // --- Auth Routes ---
 
 app.post('/auth/register', async (req, res) => {
-    const { username, password, role } = req.body;
+    let { username, password, role } = req.body;
+    if (username) username = username.trim();
+    
     const hashedPassword = await bcrypt.hash(password, 10);
     const avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`;
     // Default name to username
@@ -107,6 +193,9 @@ app.post('/auth/register', async (req, res) => {
 
     db.run("INSERT INTO users (username, password, role, points, avatar, name) VALUES (?, ?, ?, 0, ?, ?)", [username, hashedPassword, role || 'user', avatarUrl, name], function (err) {
         if (err) {
+            if (err.message.includes('UNIQUE constraint failed')) {
+                return res.status(400).json({ message: "Email or Nickname already exists" });
+            }
             return res.status(400).json({ message: "User already exists" });
         }
         const token = jwt.sign({ id: this.lastID, username, role }, SECRET_KEY);
@@ -263,7 +352,10 @@ app.post('/api/visit', (req, res) => {
 app.get('/api/feed', (req, res) => {
     const user = getUserFromToken(req);
     const userId = user ? user.id : 0;
-    const { category } = req.query;
+    const { category, search } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
 
     let query = `
         SELECT n.*, 
@@ -285,7 +377,6 @@ app.get('/api/feed', (req, res) => {
         }
     }
 
-    const { search } = req.query;
     if (search) {
         // If category filter exists, use AND, else WHERE
         query += (category && category !== 'all') ? ` AND` : ` WHERE`;
@@ -293,7 +384,8 @@ app.get('/api/feed', (req, res) => {
         params.push(`%${search}%`, `%${search}%`);
     }
 
-    query += ` ORDER BY n.created_at DESC`;
+    query += ` ORDER BY n.created_at DESC LIMIT ? OFFSET ?`;
+    params.push(limit, offset);
 
     db.all(query, params, (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -923,19 +1015,29 @@ app.post('/api/chats', authenticateToken, (req, res) => {
 app.get('/api/chats/:id/messages', authenticateToken, (req, res) => {
     const chatId = req.params.id;
     const userId = req.user.id;
+    const afterId = parseInt(req.query.afterId) || 0;
 
     // Verify participation
     db.get("SELECT * FROM chat_participants WHERE chat_id = ? AND user_id = ?", [chatId, userId], (err, row) => {
         if (!row) return res.status(403).json({ message: "Not authorized" });
 
-        db.all(
-            `SELECT m.*, u.name, u.username, u.avatar
+        let query = `SELECT m.*, u.name, u.username, u.avatar
              FROM messages m
              LEFT JOIN users u ON m.sender_id = u.id
-             WHERE m.chat_id = ?
-             ORDER BY m.created_at ASC`,
-            [chatId],
-            async (err, messages) => {
+             WHERE m.chat_id = ?`;
+        const params = [chatId];
+
+        if (afterId > 0) {
+            query += ` AND m.id > ?`;
+            params.push(afterId);
+        }
+
+        query += ` ORDER BY m.created_at ASC`;
+
+        // Safety limit for initial load (if afterId is 0, maybe limit to 100? But for now let's keep full history to not break UI expectations unless it's huge)
+        // If we limit, we need frontend pagination. For now, incremental update is the big win.
+        
+        db.all(query, params, async (err, messages) => {
                 if (err) return res.status(500).json({ error: err.message });
 
                 // Fetch attachments for each message

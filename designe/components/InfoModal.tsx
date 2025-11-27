@@ -49,8 +49,8 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose, theme }) 
                         <button
                             onClick={onClose}
                             className={`p-2 rounded-full transition-colors ${theme === 'dark'
-                                    ? 'hover:bg-zinc-800 text-gray-400 hover:text-white'
-                                    : 'hover:bg-gray-100 text-gray-500 hover:text-black'
+                                ? 'hover:bg-zinc-800 text-gray-400 hover:text-white'
+                                : 'hover:bg-gray-100 text-gray-500 hover:text-black'
                                 }`}
                         >
                             <X size={24} />

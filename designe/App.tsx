@@ -8,8 +8,8 @@ import { AdminPanel } from './components/AdminPanel';
 import { Leaderboard } from './components/Leaderboard';
 import { Statistics } from './components/Statistics';
 import { ErrorReports } from './components/ErrorReports';
+import { Information } from './components/Information';
 import { ChatModal } from './components/ChatModal';
-import { InfoModal } from './components/InfoModal';
 import { Menu, X, Moon, Sun } from 'lucide-react';
 import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
@@ -19,11 +19,10 @@ import { DialogProvider } from './context/DialogContext';
 const AppContent: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
-  const [view, setView] = useState<'feed' | 'admin' | 'leaderboard' | 'statistics' | 'reports'>('feed');
+  const [view, setView] = useState<'feed' | 'admin' | 'leaderboard' | 'statistics' | 'reports' | 'info'>('feed');
   const [category, setCategory] = useState('all');
   const [search, setSearch] = useState('');
   const [chatOpen, setChatOpen] = useState(false);
-  const [infoModalOpen, setInfoModalOpen] = useState(false);
 
   // Toggle Theme Function
   const toggleTheme = () => {
@@ -79,15 +78,15 @@ const AppContent: React.FC = () => {
 
       {/* Background Light Effect (Spotlight) */}
       <div className="fixed inset-0 z-0 pointer-events-none flex justify-center overflow-hidden">
-        {/* Dark Mode Spotlight - Increased Intensity */}
+        {/* Dark Mode Spotlight - Optimized */}
         <div className={`transition-opacity duration-700 ${theme === 'dark' ? 'opacity-100' : 'opacity-0'}`}>
-          <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[1200px] h-[800px] bg-[radial-gradient(closest-side,rgba(255,255,255,0.15),transparent)] blur-[0px] pointer-events-none" />
-          <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-white/10 blur-[100px] rounded-full pointer-events-none" />
+          <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[1200px] h-[800px] bg-[radial-gradient(closest-side,rgba(255,255,255,0.08),transparent)] pointer-events-none" />
+          <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-white/5 rounded-full blur-3xl pointer-events-none" />
         </div>
 
-        {/* Light Mode Ambient Glow */}
+        {/* Light Mode Ambient Glow - Optimized */}
         <div className={`transition-opacity duration-700 ${theme === 'light' ? 'opacity-100' : 'opacity-0'}`}>
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-blue-100/80 blur-[120px] rounded-full -translate-y-1/2 pointer-events-none" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-blue-100/50 blur-3xl rounded-full -translate-y-1/2 pointer-events-none" />
         </div>
       </div>
 
@@ -160,7 +159,7 @@ const AppContent: React.FC = () => {
               onStatisticsClick={() => { setView('statistics'); setMobileMenuOpen(false) }}
               onErrorReportsClick={() => { setView('reports'); setMobileMenuOpen(false) }}
               onChatsClick={() => { setChatOpen(true); setMobileMenuOpen(false); }}
-              onInfoClick={() => { setInfoModalOpen(true); setMobileMenuOpen(false); }}
+              onInfoClick={() => { setView('info'); setMobileMenuOpen(false); }}
               onCategorySelect={handleCategorySelect}
               onSearch={setSearch}
             />
@@ -178,7 +177,7 @@ const AppContent: React.FC = () => {
             onStatisticsClick={() => setView('statistics')}
             onErrorReportsClick={() => setView('reports')}
             onChatsClick={() => setChatOpen(true)}
-            onInfoClick={() => setInfoModalOpen(true)}
+            onInfoClick={() => setView('info')}
             onCategorySelect={handleCategorySelect}
             onSearch={setSearch}
           />
@@ -189,14 +188,14 @@ const AppContent: React.FC = () => {
             view === 'admin' ? <div className="py-4 lg:py-8 px-4 lg:px-8"><AdminPanel /></div> :
               view === 'statistics' ? <Statistics /> :
                 view === 'reports' ? <ErrorReports /> :
-                  <div className="py-4 lg:py-8 px-4 lg:px-8"><Leaderboard /></div>}
+                  view === 'info' ? <div className="py-4 lg:py-8 px-4 lg:px-8"><Information /></div> :
+                    <div className="py-4 lg:py-8 px-4 lg:px-8"><Leaderboard /></div>}
         </div>
 
         <RightPanel />
       </div>
 
       <ChatModal isOpen={chatOpen} onClose={() => setChatOpen(false)} />
-      <InfoModal isOpen={infoModalOpen} onClose={() => setInfoModalOpen(false)} theme={theme} />
     </div>
   );
 };

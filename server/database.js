@@ -176,6 +176,20 @@ function initDb() {
        // Ignore if exists
     });
 
+    // Ensure name is unique
+    db.run(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_name ON users(name)`, (err) => {
+       if (err) console.error('Error creating unique index on name:', err.message);
+    });
+
+    // --- OPTIMIZATION INDEXES ---
+    db.run(`CREATE INDEX IF NOT EXISTS idx_news_created_at ON news(created_at)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_news_category ON news(category)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_likes_news_id ON likes(news_id)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_votes_poll_id ON votes(poll_id)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_votes_option_id ON votes(option_id)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_messages_chat_id ON messages(chat_id)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_chat_participants_user_id ON chat_participants(user_id)`);
+
     console.log('Database initialized');
 
     // Create default admin if not exists

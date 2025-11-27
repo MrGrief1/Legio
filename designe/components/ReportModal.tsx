@@ -73,9 +73,9 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, newsI
     if (!isOpen) return null;
 
     return createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 transition-opacity duration-200">
             <div
-                className="bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200"
+                className="bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 w-full max-w-lg overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}

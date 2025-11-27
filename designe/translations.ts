@@ -7,6 +7,7 @@ export interface Translations {
     save: string;
     cancel: string;
     delete: string;
+    deleteConfirm: string;
     edit: string;
     search: string;
     points: string;
@@ -207,6 +208,7 @@ export const translations: Record<Language, Translations> = {
         save: 'Сохранить',
         cancel: 'Отмена',
         delete: 'Удалить',
+        deleteConfirm: 'Удалить сообщение?',
         edit: 'Редактировать',
         search: 'Поиск',
         points: 'баллов',
@@ -215,6 +217,7 @@ export const translations: Record<Language, Translations> = {
         sidebar: {
             tagline: 'Сервис для проверки интуиции. Только свежие новости и интересные опросы.',
             projectNews: 'Новости проекта',
+            chats: 'Чаты',
             leaderboard: 'Таблица лидеров',
             adminPanel: 'Админ панель',
             statistics: 'Статистика',
@@ -404,6 +407,7 @@ export const translations: Record<Language, Translations> = {
         save: 'Save',
         cancel: 'Cancel',
         delete: 'Delete',
+        deleteConfirm: 'Delete message?',
         edit: 'Edit',
         search: 'Search',
         points: 'points',

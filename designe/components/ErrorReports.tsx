@@ -151,7 +151,7 @@ export const ErrorReports: React.FC = () => {
                     reports.map((report) => (
                         <div
                             key={report.id}
-                            className="bg-white dark:bg-zinc-900/50 rounded-[24px] p-6 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all animate-in fade-in slide-in-from-bottom-2"
+                            className="bg-white dark:bg-zinc-900 rounded-[24px] p-6 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all"
                         >
                             {/* Header */}
                             <div className="flex items-start justify-between mb-4">

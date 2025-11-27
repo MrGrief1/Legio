@@ -175,10 +175,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
     return createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             {/* Blur Overlay */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={onClose} />
+            <div className="absolute inset-0 bg-black/60" onClick={onClose} />
 
             {/* Modal Content */}
-            <div className="relative bg-white dark:bg-[#121212] w-full h-full sm:h-auto sm:max-w-2xl rounded-none sm:rounded-[32px] border-0 sm:border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 sm:max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div className="relative bg-white dark:bg-[#121212] w-full h-full sm:h-auto sm:max-w-2xl rounded-none sm:rounded-[32px] border-0 sm:border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden sm:max-h-[90vh] overflow-y-auto custom-scrollbar">
 
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-800 sticky top-0 bg-white dark:bg-[#121212] z-10">
