@@ -77,16 +77,22 @@ export const AuthCard: React.FC<AuthCardProps> = ({ className = '' }) => {
 
   return (
     <div className={`bg-white dark:bg-[#121212] border border-zinc-200 dark:border-zinc-800 rounded-[32px] p-6 ${className}`}>
-      <div className="grid grid-cols-2 gap-1 p-1 bg-zinc-100 dark:bg-zinc-900 rounded-full mb-6">
+      <div className="relative flex p-1 bg-zinc-100 dark:bg-zinc-900 rounded-full mb-6">
+        <div
+          className="absolute top-1 bottom-1 left-1 w-[calc((100%-0.5rem)/2)] bg-white dark:bg-zinc-800 rounded-full shadow-sm transition-transform duration-300 ease-in-out"
+          style={{
+            transform: `translateX(${activeTab === 'register' ? '100%' : '0%'})`
+          }}
+        />
         <button
           onClick={() => setActiveTab('login')}
-          className={`py-2 text-xs font-medium rounded-full transition-all ${activeTab === 'login' ? 'bg-white dark:bg-zinc-800 text-black dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'}`}
+          className={`relative z-10 flex-1 py-2 text-xs font-medium rounded-full transition-colors duration-200 ${activeTab === 'login' ? 'text-black dark:text-white' : 'text-zinc-500 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'}`}
         >
           {t.auth.login}
         </button>
         <button
           onClick={() => setActiveTab('register')}
-          className={`py-2 text-xs font-medium rounded-full transition-all ${activeTab === 'register' ? 'bg-white dark:bg-zinc-800 text-black dark:text-white shadow-sm' : 'text-zinc-500 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'}`}
+          className={`relative z-10 flex-1 py-2 text-xs font-medium rounded-full transition-colors duration-200 ${activeTab === 'register' ? 'text-black dark:text-white' : 'text-zinc-500 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'}`}
         >
           {t.auth.register}
         </button>

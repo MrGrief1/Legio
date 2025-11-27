@@ -86,19 +86,7 @@ if (rateLimit) {
 }
 
 // Database Setup
-const dbPath = path.resolve(__dirname, 'database.sqlite');
-const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) console.error(err.message);
-    else {
-        console.log('Connected to SQLite database.');
-        db.run(`CREATE TABLE IF NOT EXISTS visits (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date TEXT,
-            count INTEGER DEFAULT 0,
-            UNIQUE(date)
-        )`);
-    }
-});
+const db = require('./database');
 
 // Ensure uploads directory exists
 if (!fs.existsSync('./uploads')) {

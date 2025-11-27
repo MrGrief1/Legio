@@ -1,20 +1,22 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, AlertTriangle, Loader2 } from 'lucide-react';
+
 import { Button } from './UI';
+import { useMountTransition } from '../hooks/useMountTransition';
 
 interface ReportModalProps {
     isOpen: boolean;
     onClose: () => void;
     newsId: number;
     newsTitle: string;
-}
+}import { X, AlertTriangle, Loader2 } from 'lucide-react';
 
 export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, newsId, newsTitle }) => {
     const [message, setMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
+    const hasTransitionedIn = useMountTransition(isOpen, 300);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -70,12 +72,19 @@ export const ReportModal: React.FC<ReportModalProps> = ({ isOpen, onClose, newsI
         }
     };
 
-    if (!isOpen) return null;
+    if (!hasTransitionedIn && !isOpen) return null;
 
     return createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 transition-opacity duration-200">
+        <div className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 transition-all duration-300 ${isOpen ? 'visible pointer-events-auto' : 'invisible pointer-events-none'}`}>
+            {/* Backdrop */}
+            <div 
+                className={`absolute inset-0 bg-black/60 transition-opacity duration-300 ease-out ${isOpen ? 'opacity-100' : 'opacity-0'}`}
+                onClick={handleClose}
+            />
+
+            {/* Modal Container */}
             <div
-                className="bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 w-full max-w-lg overflow-hidden"
+                className={`relative bg-white dark:bg-zinc-900 rounded-[32px] border border-zinc-200 dark:border-zinc-800 w-full max-w-lg overflow-hidden shadow-2xl transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'}`}
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}

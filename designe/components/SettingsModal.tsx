@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useToast } from '../context/ToastContext';
 import { Language } from '../translations';
+import { useMountTransition } from '../hooks/useMountTransition';
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -18,6 +19,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
     const { showToast } = useToast();
     const [activeTab, setActiveTab] = useState<'profile' | 'security'>('profile');
     const [loading, setLoading] = useState(false);
+    const hasTransitionedIn = useMountTransition(isOpen, 300);
 
     // Profile State
     const [newName, setNewName] = useState(user?.name || user?.username || '');
@@ -71,7 +73,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    if (!isOpen || !user) return null;
+    if (!user) return null;
 
     // ... (handlers remain the same, only return changes)
 
@@ -172,13 +174,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
         }
     };
 
+    if (!hasTransitionedIn && !isOpen) return null;
+
     return createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        <div className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 transition-all duration-300 ${isOpen ? 'visible pointer-events-auto' : 'invisible pointer-events-none'}`}>
             {/* Blur Overlay */}
-            <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+            <div
+                className={`absolute inset-0 bg-black/60 transition-opacity duration-300 ease-out ${isOpen ? 'opacity-100' : 'opacity-0'}`}
+                onClick={onClose}
+            />
 
             {/* Modal Content */}
-            <div className="relative bg-white dark:bg-[#121212] w-full h-full sm:h-auto sm:max-w-2xl rounded-none sm:rounded-[32px] border-0 sm:border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden sm:max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div
+                className={`relative bg-white dark:bg-[#121212] w-full h-full sm:h-auto sm:max-w-2xl rounded-none sm:rounded-[32px] border-0 sm:border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden sm:max-h-[90vh] overflow-y-auto custom-scrollbar will-change-transform transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+            >
 
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-800 sticky top-0 bg-white dark:bg-[#121212] z-10">
@@ -189,25 +198,33 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                 </div>
 
                 {/* Tabs */}
-                <div className="flex p-2 gap-1 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 sticky top-[73px] z-10">
-                    <button
-                        onClick={() => setActiveTab('profile')}
-                        className={`flex-1 py-2.5 text-sm font-medium rounded-xl transition-all flex items-center justify-center gap-2 ${activeTab === 'profile'
-                            ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
-                            : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
-                            }`}
-                    >
-                        <UserIcon size={16} /> {t.settings.profile}
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('security')}
-                        className={`flex-1 py-2.5 text-sm font-medium rounded-xl transition-all flex items-center justify-center gap-2 ${activeTab === 'security'
-                            ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm'
-                            : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
-                            }`}
-                    >
-                        <Lock size={16} /> {t.settings.security}
-                    </button>
+                <div className="px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 sticky top-[73px] z-10">
+                    <div className="relative flex p-1 bg-zinc-200/50 dark:bg-zinc-800 rounded-full">
+                        <div
+                            className="absolute top-1 bottom-1 left-1 w-[calc((100%-0.5rem)/2)] bg-white dark:bg-zinc-600 rounded-full shadow-sm transition-transform duration-300 ease-in-out"
+                            style={{
+                                transform: `translateX(${activeTab === 'security' ? '100%' : '0%'})`
+                            }}
+                        />
+                        <button
+                            onClick={() => setActiveTab('profile')}
+                            className={`relative z-10 flex-1 py-2 text-sm font-medium rounded-full transition-colors duration-200 flex items-center justify-center gap-2 ${activeTab === 'profile'
+                                ? 'text-zinc-900 dark:text-white'
+                                : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300'
+                                }`}
+                        >
+                            <UserIcon size={16} /> {t.settings.profile}
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('security')}
+                            className={`relative z-10 flex-1 py-2 text-sm font-medium rounded-full transition-colors duration-200 flex items-center justify-center gap-2 ${activeTab === 'security'
+                                ? 'text-zinc-900 dark:text-white'
+                                : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300'
+                                }`}
+                        >
+                            <Lock size={16} /> {t.settings.security}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Body */}
@@ -363,8 +380,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                     )}
                 </div>
 
-            </div >
-        </div >,
+            </div>
+        </div>,
         document.body
     );
 };

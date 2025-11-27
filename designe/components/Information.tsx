@@ -5,12 +5,11 @@ type TabType = 'about' | 'rules' | 'privacy';
 export const Information: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabType>('about');
 
-    const tabClasses = (tab: TabType) => `
-    px-6 py-3 text-sm font-medium transition-all cursor-pointer border-b-2
-    ${activeTab === tab
-            ? 'text-cyan-500 border-cyan-500'
-            : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300 border-transparent'}
-  `;
+    const tabs: { id: TabType; label: string }[] = [
+        { id: 'about', label: 'О проекте' },
+        { id: 'rules', label: 'Правила' },
+        { id: 'privacy', label: 'Политика' },
+    ];
 
     return (
         <div className="w-full max-w-4xl mx-auto bg-white dark:bg-zinc-900/50 rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
@@ -27,25 +26,32 @@ export const Information: React.FC = () => {
                 </div>
 
                 {/* Tabs */}
-                <div className="flex px-6 overflow-x-auto">
-                    <button
-                        onClick={() => setActiveTab('about')}
-                        className={tabClasses('about')}
-                    >
-                        О проекте
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('rules')}
-                        className={tabClasses('rules')}
-                    >
-                        Правила
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('privacy')}
-                        className={tabClasses('privacy')}
-                    >
-                        Политика
-                    </button>
+                <div className="px-6 pb-6">
+                    <div className="relative flex p-1 bg-zinc-100 dark:bg-zinc-800 rounded-full">
+                        {/* Sliding Background */}
+                        <div
+                            className="absolute top-1 bottom-1 left-1 w-[calc((100%-0.5rem)/3)] bg-white dark:bg-zinc-600 rounded-full shadow-sm transition-transform duration-300 ease-in-out"
+                            style={{
+                                transform: `translateX(${tabs.findIndex(t => t.id === activeTab) * 100}%)`
+                            }}
+                        />
+                        
+                        {tabs.map((tab) => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`
+                                    relative z-10 flex-1 py-2 text-sm font-medium transition-colors duration-200 rounded-full
+                                    ${activeTab === tab.id
+                                        ? 'text-zinc-900 dark:text-white'
+                                        : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300'
+                                    }
+                                `}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
 

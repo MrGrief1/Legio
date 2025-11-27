@@ -181,6 +181,14 @@ function initDb() {
        if (err) console.error('Error creating unique index on name:', err.message);
     });
 
+    // Visits table
+    db.run(`CREATE TABLE IF NOT EXISTS visits (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT,
+      count INTEGER DEFAULT 0,
+      UNIQUE(date)
+    )`);
+
     // --- OPTIMIZATION INDEXES ---
     db.run(`CREATE INDEX IF NOT EXISTS idx_news_created_at ON news(created_at)`);
     db.run(`CREATE INDEX IF NOT EXISTS idx_news_category ON news(category)`);

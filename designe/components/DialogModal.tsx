@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { AlertCircle, CheckCircle } from 'lucide-react';
 import { DialogType } from '../context/DialogContext';
 import { Button } from './UI';
+import { useMountTransition } from '../hooks/useMountTransition';
 
 interface DialogModalProps {
     isOpen: boolean;
@@ -19,6 +20,8 @@ export const DialogModal: React.FC<DialogModalProps> = ({
     onConfirm,
     onCancel
 }) => {
+    const hasTransitionedIn = useMountTransition(isOpen, 300);
+
     // Lock body scroll when dialog is open
     useEffect(() => {
         if (isOpen) {
@@ -52,18 +55,20 @@ export const DialogModal: React.FC<DialogModalProps> = ({
         };
     }, [isOpen, type, onConfirm, onCancel]);
 
-    if (!isOpen) return null;
+    if (!hasTransitionedIn && !isOpen) return null;
 
     return createPortal(
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+        <div className={`fixed inset-0 z-[10000] flex items-center justify-center p-4 transition-all duration-300 ${isOpen ? 'visible pointer-events-auto' : 'invisible pointer-events-none'}`}>
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-black/60 transition-opacity duration-200"
+                className={`absolute inset-0 bg-black/60 transition-opacity duration-300 ease-out ${isOpen ? 'opacity-100' : 'opacity-0'}`}
                 onClick={type === 'alert' ? onConfirm : onCancel}
             />
 
             {/* Dialog Box */}
-            <div className="relative bg-white dark:bg-[#121212] w-full max-w-md rounded-[32px] border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden">
+            <div
+                className={`relative bg-white dark:bg-[#121212] w-full max-w-md rounded-[32px] border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+            >
                 {/* Icon and Message */}
                 <div className="p-8 text-center">
                     <div className="flex justify-center mb-4">

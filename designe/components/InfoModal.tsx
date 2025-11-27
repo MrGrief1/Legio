@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import { useMountTransition } from '../hooks/useMountTransition';
 
 interface InfoModalProps {
     isOpen: boolean;
@@ -11,8 +12,7 @@ type TabType = 'about' | 'rules' | 'privacy';
 
 export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose, theme }) => {
     const [activeTab, setActiveTab] = useState<TabType>('about');
-
-    if (!isOpen) return null;
+    const hasTransitionedIn = useMountTransition(isOpen, 300);
 
     const tabClasses = (tab: TabType) => `
     px-6 py-3 text-sm font-medium transition-all cursor-pointer
@@ -21,17 +21,20 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose, theme }) 
             : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'}
   `;
 
+    if (!hasTransitionedIn && !isOpen) return null;
+
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${isOpen ? 'visible pointer-events-auto' : 'invisible pointer-events-none'}`}>
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-out ${isOpen ? 'opacity-100' : 'opacity-0'}`}
                 onClick={onClose}
             />
 
             {/* Modal */}
-            <div className={`relative w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden ${theme === 'dark' ? 'bg-zinc-900 text-white' : 'bg-white text-black'
-                }`}>
+            <div
+                className={`relative w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${theme === 'dark' ? 'bg-zinc-900 text-white' : 'bg-white text-black'} ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+            >
                 {/* Header with tabs */}
                 <div className={`sticky top-0 z-10 border-b ${theme === 'dark' ? 'border-zinc-800 bg-zinc-900' : 'border-gray-200 bg-white'
                     }`}>

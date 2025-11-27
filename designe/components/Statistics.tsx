@@ -186,7 +186,7 @@ export const Statistics: React.FC = () => {
     ];
 
     return (
-        <main className="flex-1 min-w-0 min-h-screen text-white font-sans p-6">
+        <main className="flex-1 min-w-0 min-h-screen text-zinc-900 dark:text-white font-sans p-6">
             <div className="max-w-7xl mx-auto">
 
                 {/* Header */}
@@ -199,7 +199,7 @@ export const Statistics: React.FC = () => {
                     <div className="relative">
                         <button
                             onClick={() => setShowPeriodDropdown(!showPeriodDropdown)}
-                            className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-white rounded-full transition-all text-sm font-medium"
+                            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-900 dark:text-white rounded-full transition-all text-sm font-medium shadow-sm"
                         >
                             <Calendar size={16} className="text-zinc-400" />
                             <span>{PERIODS[period]}</span>
@@ -207,7 +207,7 @@ export const Statistics: React.FC = () => {
                         </button>
 
                         {showPeriodDropdown && (
-                            <div className="absolute right-0 mt-2 w-48 bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl z-50">
+                            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-xl z-50">
                                 {(Object.keys(PERIODS) as TimePeriod[]).map((p) => (
                                     <button
                                         key={p}
@@ -216,8 +216,8 @@ export const Statistics: React.FC = () => {
                                             setShowPeriodDropdown(false);
                                         }}
                                         className={`w-full px-4 py-3 text-sm text-left transition-colors ${period === p
-                                            ? 'bg-zinc-800 text-blue-500'
-                                            : 'text-zinc-300 hover:bg-zinc-800'
+                                            ? 'bg-zinc-50 dark:bg-zinc-800 text-blue-500'
+                                            : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800'
                                             }`}
                                     >
                                         {PERIODS[p]}
@@ -231,13 +231,13 @@ export const Statistics: React.FC = () => {
                 {/* Summary Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     {summaryCards.map((card, index) => (
-                        <div key={index} className="bg-zinc-900/50 border border-zinc-800 p-5 rounded-2xl hover:bg-zinc-900 transition-colors cursor-pointer group">
+                        <div key={index} className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors cursor-pointer group shadow-sm">
                             <div className="flex items-start justify-between mb-2">
-                                <span className="text-zinc-400 text-sm font-medium">{card.title}</span>
-                                <card.icon size={18} className="text-zinc-500 group-hover:text-blue-500 transition-colors" />
+                                <span className="text-zinc-500 dark:text-zinc-400 text-sm font-medium">{card.title}</span>
+                                <card.icon size={18} className="text-zinc-400 dark:text-zinc-500 group-hover:text-blue-500 transition-colors" />
                             </div>
                             <div className="flex items-baseline gap-2 flex-wrap">
-                                <span className="text-2xl font-bold text-white">{card.value}</span>
+                                <span className="text-2xl font-bold text-zinc-900 dark:text-white">{card.value}</span>
                                 <span className="text-xs font-medium text-green-500 bg-green-500/10 px-1.5 py-0.5 rounded flex items-center gap-0.5">
                                     <ArrowUpRight size={10} />
                                     {card.change}
@@ -253,14 +253,14 @@ export const Statistics: React.FC = () => {
                     {/* Left Column: Main Chart */}
                     <div className="lg:col-span-4 space-y-6">
                         {/* Tabs */}
-                        <div className="border-b border-zinc-800 flex gap-8 overflow-x-auto">
+                        <div className="border-b border-zinc-200 dark:border-zinc-800 flex gap-8 overflow-x-auto">
                             {TABS.map((tab) => (
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id as TabType)}
                                     className={`pb-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id
                                         ? 'border-blue-500 text-blue-500'
-                                        : 'border-transparent text-zinc-500 hover:text-zinc-300'
+                                        : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300'
                                         }`}
                                 >
                                     {tab.label}
@@ -269,9 +269,9 @@ export const Statistics: React.FC = () => {
                         </div>
 
                         {/* Chart Area */}
-                        <div className="bg-zinc-900/30 border border-zinc-800 p-6 rounded-3xl flex flex-col">
+                        <div className="bg-zinc-50 dark:bg-zinc-900/30 border border-zinc-200 dark:border-zinc-800 p-6 rounded-3xl flex flex-col">
                             <div className="flex items-center justify-between mb-8">
-                                <h3 className="text-lg font-bold text-white">
+                                <h3 className="text-lg font-bold text-zinc-900 dark:text-white">
                                     {activeTab === 'overview' ? 'Уровень вовлеченности' : TABS.find(t => t.id === activeTab)?.label}
                                 </h3>
                                 <div className="flex gap-2 items-center">
@@ -297,7 +297,8 @@ export const Statistics: React.FC = () => {
                                             y1={`${100 - tick}%`}
                                             x2="100%"
                                             y2={`${100 - tick}%`}
-                                            stroke="#27272a"
+                                            stroke="currentColor"
+                                            className="text-zinc-200 dark:text-zinc-800"
                                             strokeWidth="1"
                                             strokeDasharray="4 4"
                                         />
@@ -330,9 +331,9 @@ export const Statistics: React.FC = () => {
                                                         y="100%"
                                                         dy="20"
                                                         textAnchor="middle"
-                                                        fill="#71717a"
+                                                        fill="currentColor"
                                                         fontSize="10"
-                                                        className="pointer-events-none"
+                                                        className="text-zinc-500 pointer-events-none"
                                                     >
                                                         {period === '24h' ? d.date.split(':')[0] : d.date.slice(5)}
                                                     </text>
@@ -345,11 +346,11 @@ export const Statistics: React.FC = () => {
                                 {/* Tooltip Overlay */}
                                 {hoveredIndex !== null && chartData[hoveredIndex] && (
                                     <div
-                                        className="absolute top-0 bg-zinc-800 border border-zinc-700 p-2 rounded-lg shadow-xl pointer-events-none z-10"
+                                        className="absolute top-0 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 p-2 rounded-lg shadow-xl pointer-events-none z-10"
                                         style={{ left: `${(hoveredIndex / chartData.length) * 100}%`, transform: 'translateX(-50%) translateY(-120%)' }}
                                     >
-                                        <p className="text-xs text-zinc-400 mb-1">{chartData[hoveredIndex].date}</p>
-                                        <p className="text-lg font-bold text-white">
+                                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">{chartData[hoveredIndex].date}</p>
+                                        <p className="text-lg font-bold text-zinc-900 dark:text-white">
                                             {chartData[hoveredIndex].count}{isPercentage ? '%' : ''}
                                         </p>
                                     </div>
@@ -362,22 +363,22 @@ export const Statistics: React.FC = () => {
 
                 {/* Top Polls Section */}
                 <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-3 bg-zinc-900/50 border border-zinc-800 p-6 rounded-3xl">
-                        <h3 className="text-xl font-bold mb-4">Популярные опросы</h3>
+                    <div className="lg:col-span-3 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 p-6 rounded-3xl shadow-sm">
+                        <h3 className="text-xl font-bold mb-4 text-zinc-900 dark:text-white">Популярные опросы</h3>
                         <div className="space-y-4">
                             {stats.topPolls && stats.topPolls.length > 0 ? (
                                 stats.topPolls.map((poll, i) => (
-                                    <div key={poll.id} className="flex items-center gap-4 p-4 bg-zinc-800/30 rounded-xl hover:bg-zinc-800/50 transition-colors">
+                                    <div key={poll.id} className="flex items-center gap-4 p-4 bg-zinc-50 dark:bg-zinc-800/30 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors">
                                         <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-blue-500/10 text-blue-500 font-bold rounded-lg">
                                             {i + 1}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="font-medium text-white truncate" title={poll.question}>
+                                            <p className="font-medium text-zinc-900 dark:text-white truncate" title={poll.question}>
                                                 {poll.question}
                                             </p>
                                             <p className="text-sm text-zinc-500">{poll.votes} голосов</p>
                                         </div>
-                                        <div className={`px-2 py-1 rounded text-xs font-medium ${poll.active ? 'bg-green-500/10 text-green-500' : 'bg-zinc-700/50 text-zinc-400'}`}>
+                                        <div className={`px-2 py-1 rounded text-xs font-medium ${poll.active ? 'bg-green-500/10 text-green-500' : 'bg-zinc-200 dark:bg-zinc-700/50 text-zinc-600 dark:text-zinc-400'}`}>
                                             {poll.active ? 'Активен' : 'Завершен'}
                                         </div>
                                     </div>

@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { X, Search, Send, MoreVertical, Paperclip, Smile, ChevronLeft, Info as InfoIcon, Shield, Image as ImageIcon, Film, Calendar, User, ArrowUp, MessageCircle, FileText } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useDialog } from '../context/DialogContext';
 import { ChatContactItem, ChatMessageItem, Message, ChatContact } from './ChatComponents';
+import { useMountTransition } from '../hooks/useMountTransition';
 
 interface ChatModalProps {
     isOpen: boolean;
@@ -14,6 +16,7 @@ export const ChatModal: React.FC<ChatModalProps> = React.memo(({ isOpen, onClose
     const { user } = useAuth();
     const { t } = useLanguage();
     const { showAlert, showConfirm } = useDialog();
+    const hasTransitionedIn = useMountTransition(isOpen, 300);
     const [activeChatId, setActiveChatId] = useState<number | null>(null);
     const [contacts, setContacts] = useState<ChatContact[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -53,10 +56,10 @@ export const ChatModal: React.FC<ChatModalProps> = React.memo(({ isOpen, onClose
     // Optimized polling with visibility check
     useEffect(() => {
         let timeoutId: NodeJS.Timeout;
-        
+
         const pollMessages = async () => {
             if (!activeChatId || !isOpen) return;
-            
+
             if (document.hidden) {
                 timeoutId = setTimeout(pollMessages, 5000);
                 return;
@@ -78,7 +81,7 @@ export const ChatModal: React.FC<ChatModalProps> = React.memo(({ isOpen, onClose
                             return [...prev, ...newMsgs];
                         });
                     }
-                    
+
                     if (activeContact?.unread_count && activeContact.unread_count > 0) {
                         markMessagesAsRead(activeChatId);
                     }
@@ -86,7 +89,7 @@ export const ChatModal: React.FC<ChatModalProps> = React.memo(({ isOpen, onClose
             } catch (error) {
                 console.error('Error fetching messages:', error);
             }
-            
+
             timeoutId = setTimeout(pollMessages, 4000);
         };
 
@@ -374,16 +377,16 @@ export const ChatModal: React.FC<ChatModalProps> = React.memo(({ isOpen, onClose
         }
     };
 
-    if (!isOpen) return null;
+    if (!hasTransitionedIn && !isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-0 sm:p-6 lg:p-8 text-zinc-900 dark:text-white font-sans">
+        <div className={`fixed inset-0 z-[60] flex items-center justify-center p-0 sm:p-6 lg:p-8 text-zinc-900 dark:text-white font-sans transition-all duration-300 ${isOpen ? 'visible pointer-events-auto' : 'invisible pointer-events-none'}`}>
             <div
-                className="absolute inset-0 bg-black/60 transition-opacity duration-300"
+                className={`absolute inset-0 bg-black/60 transition-opacity duration-300 ease-out ${isOpen ? 'opacity-100' : 'opacity-0'}`}
                 onClick={onClose}
             />
 
-            <div className="relative w-full max-w-6xl h-full sm:h-[85vh] bg-white dark:bg-black sm:rounded-[32px] border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden flex flex-col sm:flex-row">
+            <div className={`relative w-full max-w-6xl h-full sm:h-[85vh] bg-white dark:bg-black sm:rounded-[32px] border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden flex flex-col sm:flex-row transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'}`}>
                 {/* Left Sidebar */}
                 <div className={`
                     absolute inset-0 z-20 sm:static w-full sm:w-80 md:w-96 flex flex-col border-r border-zinc-200 dark:border-zinc-800 transition-transform duration-300 bg-white dark:bg-zinc-950
@@ -519,7 +522,7 @@ export const ChatModal: React.FC<ChatModalProps> = React.memo(({ isOpen, onClose
                                     {/* Input Area */}
                                     {!activeContact.is_blocked ? (
                                         <div className="p-4 sm:p-5 bg-white dark:bg-zinc-950 border-t border-zinc-200/50 dark:border-zinc-800/50">
-                                             {/* File Previews */}
+                                            {/* File Previews */}
                                             {files.length > 0 && (
                                                 <div className="flex gap-3 mb-3 overflow-x-auto pb-2">
                                                     {files.map((file, idx) => (
@@ -595,7 +598,7 @@ export const ChatModal: React.FC<ChatModalProps> = React.memo(({ isOpen, onClose
                                                 <X size={24} />
                                             </button>
                                         </div>
-                                        
+
                                         <div className="flex flex-col items-center mb-8">
                                             <img src={activeContact.avatar} alt={activeContact.name} className="w-24 h-24 rounded-full object-cover mb-4 ring-4 ring-zinc-100 dark:ring-zinc-800" loading="lazy" />
                                             <h2 className="text-xl font-bold text-zinc-900 dark:text-white mb-1">{activeContact.name}</h2>
@@ -607,12 +610,12 @@ export const ChatModal: React.FC<ChatModalProps> = React.memo(({ isOpen, onClose
                                                 <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Био</h4>
                                                 <p className="text-sm text-zinc-700 dark:text-zinc-300">{activeContact.bio || 'Нет информации'}</p>
                                             </div>
-                                            
+
                                             <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800">
                                                 <button
                                                     onClick={toggleBlockUser}
-                                                    className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${activeContact.is_blocked 
-                                                        ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' 
+                                                    className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${activeContact.is_blocked
+                                                        ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'
                                                         : 'hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-600 dark:text-zinc-400'}`}
                                                 >
                                                     <Shield size={18} />

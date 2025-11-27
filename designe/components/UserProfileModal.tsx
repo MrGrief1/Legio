@@ -1,6 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { X, Calendar, Trophy, User, Shield, Clock } from 'lucide-react';
+import { useMountTransition } from '../hooks/useMountTransition';
 
 interface UserProfileModalProps {
     isOpen: boolean;
@@ -19,13 +20,21 @@ interface UserProfileModalProps {
 }
 
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, user }) => {
-    if (!isOpen || !user) return null;
+    const hasTransitionedIn = useMountTransition(isOpen, 300);
+
+    if (!user) return null;
+    if (!hasTransitionedIn && !isOpen) return null;
 
     return createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+        <div className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 transition-all duration-300 ${isOpen ? 'visible pointer-events-auto' : 'invisible pointer-events-none'}`}>
+            <div
+                className={`absolute inset-0 bg-black/60 transition-opacity duration-300 ease-out ${isOpen ? 'opacity-100' : 'opacity-0'}`}
+                onClick={onClose}
+            />
 
-            <div className="relative bg-white dark:bg-[#121212] w-full max-w-md rounded-[32px] border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden">
+            <div
+                className={`relative bg-white dark:bg-[#121212] w-full max-w-md rounded-[32px] border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden will-change-transform transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+            >
 
                 {/* Header / Cover */}
                 <div className="h-32 bg-gradient-to-r from-blue-500 to-purple-600 relative">

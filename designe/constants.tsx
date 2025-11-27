@@ -74,9 +74,9 @@ export const CATEGORIES: Category[] = [
 ];
 
 export const LEADERS: User[] = [
-  { id: '1', name: 'Julia', points: 74002, avatar: 'https://picsum.photos/seed/julia/50/50', rank: 1 },
-  { id: '2', name: 'Andrey', points: 60753, avatar: 'https://picsum.photos/seed/andrey/50/50', rank: 2 },
-  { id: '3', name: 'Супер Антон', points: 45559, avatar: 'https://picsum.photos/seed/anton/50/50', rank: 3 },
+  { id: '1', name: 'Julia', username: 'julia', points: 74002, avatar: 'https://picsum.photos/seed/julia/50/50', rank: 1 },
+  { id: '2', name: 'Andrey', username: 'andrey', points: 60753, avatar: 'https://picsum.photos/seed/andrey/50/50', rank: 2 },
+  { id: '3', name: 'Супер Антон', username: 'anton', points: 45559, avatar: 'https://picsum.photos/seed/anton/50/50', rank: 3 },
 ];
 
 export const NEWS: NewsItem[] = [
@@ -88,6 +88,7 @@ export const NEWS: NewsItem[] = [
     tags: ['Общество', 'Семья'],
     date: '2 часа назад',
     poll: {
+      id: 1,
       question: 'Включат обсуждение опасности эскорт-бизнеса в школьный предмет «Разговоры о важном» до 18.03.2026?',
       options: [
         { id: 1, text: "Да, потому что участились случаи, когда детей под предлогом работы затягивают в сферу", percent: 62 },
@@ -103,6 +104,7 @@ export const NEWS: NewsItem[] = [
     tags: ['Криптовалюта', 'Финансы'],
     date: '4 часа назад',
     poll: {
+      id: 2,
       question: 'Сможет ли Биткоин закрепиться выше $100,000 до конца этого месяца?',
       options: [
         { id: 1, text: "Да, тренд очень сильный, институционалы продолжают покупать", percent: 84 },
@@ -115,7 +117,21 @@ export const NEWS: NewsItem[] = [
 export const PRIZE_WINNER: User = {
   id: 'winner',
   name: 'Анна',
+  username: 'anna',
   points: 500,
   avatar: 'https://picsum.photos/seed/anna/100/100',
   prize: '+500 баллов и Приз от Легио!'
+};
+
+export const LEVELS = [
+  { id: 1, name: 'Стартовый', minPoints: 0 },
+  { id: 2, name: 'Бронзовый', minPoints: 1000 },
+  { id: 3, name: 'Серебряный', minPoints: 3000 },
+  { id: 4, name: 'Золотой', minPoints: 9000 },
+  { id: 5, name: 'Платиновый', minPoints: 30000 },
+  { id: 6, name: 'Алмазный', minPoints: 50000 },
+];
+
+export const getLevel = (points: number) => {
+  return LEVELS.slice().reverse().find(l => points >= l.minPoints) || LEVELS[0];
 };

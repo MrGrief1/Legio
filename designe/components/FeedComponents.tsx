@@ -29,7 +29,9 @@ export const Poll: React.FC<PollProps> = React.memo(({ data, onVoteSuccess }) =>
     setHasVoted(!!data.user_voted_option_id);
   }, [data]);
 
-  const handleVote = async () => {
+  const handleVote = async (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    e?.preventDefault();
     if (selectedOption === null || !user) return;
     setIsVoting(true);
 
@@ -94,7 +96,11 @@ export const Poll: React.FC<PollProps> = React.memo(({ data, onVoteSuccess }) =>
   const isAdmin = user && user.role === 'admin';
 
   return (
-    <div className={`bg-zinc-50 dark:bg-zinc-900/50 rounded-[24px] p-5 lg:p-6 mb-6 border ${pollData.is_resolved ? 'border-green-500/20 dark:border-green-500/20' : 'border-zinc-100 dark:border-zinc-800'}`} >
+    <div 
+      className={`bg-zinc-50 dark:bg-zinc-900/50 rounded-[24px] p-5 lg:p-6 mb-6 border ${pollData.is_resolved ? 'border-green-500/20 dark:border-green-500/20' : 'border-zinc-100 dark:border-zinc-800'}`}
+      onClick={e => e.stopPropagation()}
+      onMouseDown={e => e.stopPropagation()}
+    >
       <h4 className="font-semibold text-zinc-900 dark:text-white text-[15px] mb-5 leading-snug">
         {pollData.question}
         {pollData.is_resolved === 1 && <span className="ml-2 text-xs text-green-500 font-bold uppercase border border-green-500 rounded px-1">Завершен</span>}
@@ -107,7 +113,13 @@ export const Poll: React.FC<PollProps> = React.memo(({ data, onVoteSuccess }) =>
           return (
             <div key={option.id} className="space-y-2">
               <div
-                onClick={() => !hasVoted && !pollData.is_resolved && setSelectedOption(option.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  if (!hasVoted && !pollData.is_resolved) {
+                    setSelectedOption(option.id);
+                  }
+                }}
                 className={`relative group/option cursor-pointer rounded-xl transition-all duration-300 overflow-hidden ${hasVoted || pollData.is_resolved ? 'cursor-default' : 'hover:bg-zinc-100 dark:hover:bg-zinc-800/50'
                   } ${isCorrect ? 'ring-2 ring-green-500' : ''}`}
               >
@@ -195,7 +207,7 @@ export const Poll: React.FC<PollProps> = React.memo(({ data, onVoteSuccess }) =>
       <div className="flex justify-between items-center h-10">
         {isAdmin && (
           <button
-            onClick={() => setShowVoters(!showVoters)}
+            onClick={(e) => { e.stopPropagation(); setShowVoters(!showVoters); }}
             className="text-xs text-zinc-400 hover:text-blue-500 transition-colors flex items-center gap-1"
           >
             {showVoters ? 'Скрыть голоса' : 'Показать голоса'}
@@ -331,7 +343,11 @@ export const NewsCard: React.FC<{ item: NewsItem; onRefresh?: () => void }> = Re
             </p>
 
             {item.poll && (
-              <div onClick={e => e.stopPropagation()}>
+              <div 
+                onClick={e => e.stopPropagation()}
+                onMouseDown={e => e.stopPropagation()}
+                onPointerDown={e => e.stopPropagation()}
+              >
                 <Poll data={item.poll} onVoteSuccess={onRefresh} />
               </div>
             )}
@@ -340,12 +356,12 @@ export const NewsCard: React.FC<{ item: NewsItem; onRefresh?: () => void }> = Re
               <button
                 onClick={handleLike}
                 disabled={likeLoading}
-                className={`p-2.5 rounded-full transition-all duration-200 group/btn ${isLiked
+                className={`p-2.5 rounded-full transition-colors duration-200 group/btn relative ${isLiked
                   ? 'bg-red-50 dark:bg-red-900/20 text-red-500'
                   : 'text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-red-500'
                   }`}
               >
-                <Heart size={22} className={`transition-transform duration-200 ${isLiked ? 'fill-current scale-110' : 'group-hover/btn:scale-110'}`} />
+                <Heart size={22} className={`${isLiked ? 'fill-current' : ''}`} />
               </button>
 
               <button
@@ -401,7 +417,7 @@ export const NewsCard: React.FC<{ item: NewsItem; onRefresh?: () => void }> = Re
         </div >
       </div >
 
-      <NewsModal item={item} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      <NewsModal item={item} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onRefresh={onRefresh}>
         {item.poll && <Poll data={item.poll} onVoteSuccess={onRefresh} />}
       </NewsModal>
 

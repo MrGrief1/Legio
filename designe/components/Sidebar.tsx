@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { CATEGORIES, getCategoryName } from '../constants';
+import { CATEGORIES, getCategoryName, LEVELS, getLevel } from '../constants';
+import { LevelsModal } from './LevelsModal';
 import { MessageSquare, Info, Search, Moon, Sun, Shield, Trophy, BarChart3, AlertCircle, MessageCircle, Heart } from 'lucide-react';
 import { Input } from './UI';
 import { useAuth } from '../context/AuthContext';
@@ -22,9 +23,32 @@ interface SidebarProps {
   onSearch?: (query: string) => void;
 }
 
+import { User } from '../types';
+
 export const Sidebar: React.FC<SidebarProps> = ({ theme, toggleTheme, className = '', showHeader = true, onAdminClick, onFeedClick, onLeaderboardClick, onStatisticsClick, onErrorReportsClick, onChatsClick, onInfoClick, onCategorySelect, onSearch }) => {
   const { user } = useAuth();
   const { t, language } = useLanguage();
+  const [leaders, setLeaders] = React.useState<User[]>([]);
+  const [isLevelsModalOpen, setIsLevelsModalOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    fetch('http://localhost:3001/api/leaders')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch');
+        return res.json();
+      })
+      .then(data => {
+        if (Array.isArray(data)) {
+          setLeaders(data);
+        } else {
+          setLeaders([]);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        setLeaders([]);
+      });
+  }, []);
 
   return (
     <aside className={`flex flex-col w-full pt-8 pb-6 px-4 ${className}`}>
@@ -144,6 +168,38 @@ export const Sidebar: React.FC<SidebarProps> = ({ theme, toggleTheme, className 
         </button>
       </div>
 
+      {/* Progress Widget */}
+      {user && (
+        <div 
+          className="mb-8 bg-zinc-100 dark:bg-zinc-800/50 rounded-2xl p-4 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+          onClick={() => setIsLevelsModalOpen(true)}
+        >
+           <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                  <Trophy size={16} />
+                </div>
+                <div>
+                  <div className="text-xs text-zinc-500 uppercase tracking-wider font-medium">Прогресс</div>
+                  <div className="text-sm font-bold text-zinc-900 dark:text-white">{getLevel(user.points || 0).name}</div>
+                </div>
+              </div>
+              <div className="text-sm font-mono font-medium text-zinc-500">
+                {user.points?.toLocaleString() || 0}
+              </div>
+           </div>
+          
+          <div className="h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-blue-500 rounded-full transition-all duration-1000"
+              style={{ 
+                width: `${Math.min(100, Math.max(0, ((user.points || 0) - getLevel(user.points || 0).minPoints) / ((LEVELS[getLevel(user.points || 0).id]?.minPoints || (getLevel(user.points || 0).minPoints * 2)) - getLevel(user.points || 0).minPoints) * 100))}%` 
+              }}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Search */}
       <div className="mb-8">
         <Input
@@ -172,6 +228,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ theme, toggleTheme, className 
           </button>
         ))}
       </div>
+
+      <LevelsModal isOpen={isLevelsModalOpen} onClose={() => setIsLevelsModalOpen(false)} />
     </aside>
   );
 };

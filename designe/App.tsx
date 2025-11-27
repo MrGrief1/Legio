@@ -109,7 +109,7 @@ const AppContent: React.FC = () => {
 
         {/* Redesigned Mobile Menu Overlay (Full Screen) */}
         <div
-          className={`fixed inset-0 z-50 bg-zinc-50/95 dark:bg-black/95 backdrop-blur-xl overflow-y-auto transition-all duration-300 lg:hidden ${mobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
+          className={`fixed inset-0 z-50 bg-zinc-50 dark:bg-black overflow-y-auto transition-opacity duration-300 lg:hidden ${mobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
             }`}
         >
           <div className="min-h-full flex flex-col p-4 pb-12">
